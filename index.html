@@ -2059,27 +2059,7 @@
                 }
             }, 1000);
         }
-
-        window.onload = function() {
-            checkAuthState();
-        };
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Module Diễn Đàn Khối 8</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        body { background: #0f071b; color: #f3e8ff; font-family: sans-serif; }
-        .glass-card {
-            background: rgba(30, 11, 58, 0.85);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(216, 180, 254, 0.2);
-        }
-    </style>
-</head>
-<body class="p-4 md:p-8 max-w-4xl mx-auto space-y-6">
-
-    <!-- 🚨 BĂNG RÔN BÁO CÁO VI PHẠM TỐI CAO -->
+<!-- 🚨 BĂNG RÔN BÁO CÁO VI PHẠM TỐI CAO -->
     <div id="violationBanner" class="hidden fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-red-700 via-rose-800 to-red-900 text-white p-4 shadow-2xl border-b-4 border-amber-400 animate-pulse">
         <div class="max-w-5xl mx-auto flex items-center justify-between flex-wrap gap-3">
             <div class="flex items-center gap-3">
@@ -2413,12 +2393,7 @@ container.innerHTML = `<div class="glass-card p-6 rounded-3xl text-center text-x
         function closeViolationBanner() {
             document.getElementById('violationBanner').classList.add('hidden');
         }
-   
-
-        // Khởi chạy module khi load trang
+        
         window.onload = function() {
-            renderPosts();
-        };
-    </script>
-</body>
-</html>
+            checkAuthState();
+            
