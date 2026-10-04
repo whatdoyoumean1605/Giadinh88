@@ -2132,7 +2132,7 @@
         }
          // Giả lập tài khoản hiện tại (Bạn có thể đổi tài khoản để test phân quyền)
         // role: "SUPER_ADMIN" (Tối Cao) hoặc "STUDENT" (Học Sinh)
-        let currentUser = JSON.parse(localStorage.getItem('k8_current_user')) || {
+        currentUser = JSON.parse(localStorage.getItem('k8_current_user')) || {
             accountID: "888888",
             nickname: "Tối Cao aimabiet",
 role: "SUPER_ADMIN", // Đổi thành "STUDENT" để thử vai trò người dùng thường
