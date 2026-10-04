@@ -2066,3 +2066,364 @@
     </script>
 </body>
 </html>
+<!DOCTYPE html>
+<html lang="vi" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Module Diễn Đàn Khối 8</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background: #0f071b; color: #f3e8ff; font-family: sans-serif; }
+        .glass-card {
+            background: rgba(30, 11, 58, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(216, 180, 254, 0.2);
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 max-w-4xl mx-auto space-y-6">
+
+    <!-- 🚨 BĂNG RÔN BÁO CÁO VI PHẠM TỐI CAO -->
+    <div id="violationBanner" class="hidden fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-red-700 via-rose-800 to-red-900 text-white p-4 shadow-2xl border-b-4 border-amber-400 animate-pulse">
+        <div class="max-w-5xl mx-auto flex items-center justify-between flex-wrap gap-3">
+            <div class="flex items-center gap-3">
+                <span class="text-3xl">🚨</span>
+                <div>
+                    <h3 class="font-black text-sm md:text-base uppercase tracking-wider text-amber-300">THÔNG BÁO XỬ PHẠM TỪ BAN QUẢN TRỊ TỐI CAO</h3>
+                    <p id="violationBannerText" class="text-xs md:text-sm font-extrabold text-white">
+                        Người dùng <span id="violationUsername" class="underline font-black text-amber-300">...</span> đã vi phạm nội quy diễn đàn, cảnh cáo trừng phạt
+                    </p>
+                </div>
+            </div>
+            <button onclick="closeViolationBanner()" class="px-4 py-2 bg-amber-400 text-slate-950 font-black text-xs rounded-xl hover:bg-amber-300 transition">
+                ĐÃ RÕ (ĐÓNG)
+            </button>
+        </div>
+    </div>
+
+    <!-- KHU VỰC TẠO BÀI ĐĂNG MÓI -->
+    <div class="glass-card rounded-3xl p-5 space-y-4 shadow-xl">
+        <h3 class="font-extrabold text-lg text-white flex items-center gap-2">
+            <i class="fa-solid fa-pen-to-square text-purple-400"></i> Diễn Đàn & Góc Chill Server
+        </h3>
+
+        <textarea id="forumPostInput" rows="3" placeholder="Viết nội dung chia sẻ lên toàn server..." class="w-full bg-slate-900/90 border border-purple-500/30 rounded-2xl p-3 text-xs text-white placeholder-purple-300/50 focus:outline-none focus:border-purple-400 resize-none"></textarea>
+
+        <!-- Preview Ảnh Upload -->
+        <div id="forumImagePreviewBox" class="hidden relative rounded-2xl overflow-hidden border border-purple-500/30 max-h-60">
+            <img id="forumImagePreview" src="" class="w-full object-cover">
+            <button onclick="removeForumImage()" class="absolute top-2 right-2 w-7 h-7 rounded-full bg-slate-950/80 text-white flex items-center justify-center text-xs hover:bg-red-600">
+<i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="flex items-center justify-between border-t border-purple-500/20 pt-3 flex-wrap gap-2">
+            <div class="flex items-center gap-2">
+                <label class="cursor-pointer px-3.5 py-2 rounded-xl bg-purple-900/50 border border-purple-500/30 text-purple-200 text-xs font-bold hover:bg-purple-800/50 transition flex items-center gap-2">
+                    <i class="fa-solid fa-image text-emerald-400"></i> Tải Ảnh Lên
+                    <input type="file" id="forumFileInput" accept="image/*" class="hidden" onchange="handleForumImageUpload(event)">
+                </label>
+
+                <label class="cursor-pointer px-3 py-2 rounded-xl bg-purple-900/50 border border-purple-500/30 text-purple-200 text-xs font-bold flex items-center gap-2">
+                    <input type="checkbox" id="forumAnonCheck" class="rounded border-purple-400 text-purple-600">
+                    <span>🕵️ Ẩn Danh</span>
+                </label>
+            </div>
+
+            <button onclick="submitForumPost()" class="px-5 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-extrabold text-xs shadow hover:opacity-90 transition">
+                Đăng Bài Lên Server
+            </button>
+        </div>
+    </div>
+
+    <!-- DANH SÁCH BÀI ĐĂNG DIỄN ĐÀN -->
+    <div id="forumPostsContainer" class="space-y-6"></div>
+
+    <!-- MODAL CHỈNH SỬA BÀI ĐĂNG -->
+    <div id="editPostModal" class="hidden fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="glass-card max-w-md w-full rounded-3xl p-6 border border-purple-500/50 space-y-4">
+            <div class="flex items-center justify-between">
+                <h3 class="font-extrabold text-base text-white">✏️️ Cập Nhật Bài Đăng</h3>
+                <button onclick="closeEditPostModal()" class="text-purple-300 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <input type="hidden" id="editPostId">
+            <textarea id="editPostContent" rows="4" class="w-full bg-slate-900 border border-purple-500/30 rounded-xl p-3 text-xs text-white focus:outline-none resize-none"></textarea>
+            <button onclick="saveEditedPost()" class="w-full py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-extrabold text-xs rounded-xl shadow">
+                Lưu Thay Đổi
+            </button>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC PHÂN QUYỀN VÀ TƯƠNG TÁC -->
+    <script>
+        // Giả lập tài khoản hiện tại (Bạn có thể đổi tài khoản để test phân quyền)
+        // role: "SUPER_ADMIN" (Tối Cao) hoặc "STUDENT" (Học Sinh)
+        let currentUser = JSON.parse(localStorage.getItem('k8_current_user')) || {
+            accountID: "888888",
+            nickname: "Tối Cao aimabiet",
+role: "SUPER_ADMIN", // Đổi thành "STUDENT" để thử vai trò người dùng thường
+            points: 100,
+            avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=aimabiet"
+        };
+
+        let uploadedImageBase64 = "";
+
+        // Khởi tạo dữ liệu bài viết
+        function getPosts() {
+            return JSON.parse(localStorage.getItem('k8_forum_posts')) || [];
+        }
+
+        function savePosts(posts) {
+            localStorage.setItem('k8_forum_posts', JSON.stringify(posts));
+        }
+
+        // Tải ảnh xem trước
+        function handleForumImageUpload(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (evt) => {
+                    uploadedImageBase64 = evt.target.result;
+                    document.getElementById('forumImagePreview').src = uploadedImageBase64;
+                    document.getElementById('forumImagePreviewBox').classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function removeForumImage() {
+            uploadedImageBase64 = "";
+            document.getElementById('forumImagePreviewBox').classList.add('hidden');
+            document.getElementById('forumFileInput').value = "";
+        }
+
+        // Đăng bài mới
+        function submitForumPost() {
+            const content = document.getElementById('forumPostInput').value.trim();
+            const isAnon = document.getElementById('forumAnonCheck').checked;
+
+            if (!content && !uploadedImageBase64) {
+                alert("Vui lòng nhập nội dung hoặc chọn ảnh để đăng!");
+                return;
+            }
+
+            const posts = getPosts();
+            const newPost = {
+                id: 'post_' + Date.now(),
+                authorID: currentUser.accountID,
+                authorNickname: isAnon ? "Người dùng Ẩn Danh 🕵️" : currentUser.nickname,
+                authorAvatar: isAnon ? "https://api.dicebear.com/7.x/bottts/svg?seed=anon" : currentUser.avatar,
+                content: content,
+                image: uploadedImageBase64,
+                timestamp: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) + ' - ' + new Date().toLocaleDateString('vi-VN'),
+                likes: [],
+                comments: []
+            };
+
+            posts.unshift(newPost);
+            savePosts(posts);
+
+            // Reset Form
+            document.getElementById('forumPostInput').value = "";
+            removeForumImage();
+            renderPosts();
+        }
+
+        // Hiển thị danh sách bài đăng
+        function renderPosts() {
+            const posts = getPosts();
+            const container = document.getElementById('forumPostsContainer');
+
+            if (posts.length === 0) {
+container.innerHTML = `<div class="glass-card p-6 rounded-3xl text-center text-xs text-purple-300/60">Chưa có bài đăng nào trên server. Hãy là người đầu tiên đăng bài!</div>`;
+                return;
+            }
+
+            container.innerHTML = posts.map(post => {
+                const isAuthor = post.authorID === currentUser.accountID;
+                const isSupreme = currentUser.role === 'SUPER_ADMIN' || currentUser.accountID === '888888';
+                const isLiked = post.likes.includes(currentUser.accountID);
+
+                return `
+                    <div class="glass-card rounded-3xl p-5 space-y-4 shadow-lg relative">
+                        <!-- Header Bài Đăng -->
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <img src="${post.authorAvatar}" class="w-10 h-10 rounded-full object-cover border border-purple-400/40">
+                                <div>
+                                    <h4 class="font-extrabold text-sm text-white">${post.authorNickname}</h4>
+                                    <span class="text-[10px] text-purple-300/60">${post.timestamp}</span>
+                                </div>
+                            </div>
+
+                            <!-- Menu Cài Đặt Bài Đăng (Sửa / Xóa / Xử Phạt) -->
+                            <div class="relative group">
+                                <button class="w-8 h-8 rounded-full bg-slate-900/60 hover:bg-purple-800/50 flex items-center justify-center text-purple-200">
+                                    <i class="fa-solid fa-ellipsis-vertical"></i>
+                                </button>
+                                <div class="hidden group-hover:block absolute right-0 top-8 bg-slate-900 border border-purple-500/30 rounded-2xl shadow-xl w-48 py-2 z-20 space-y-1">
+                                    ${isAuthor ? `
+                                        <button onclick="openEditPostModal('${post.id}')" class="w-full text-left px-4 py-2 text-xs font-bold text-purple-200 hover:bg-purple-800/40 flex items-center gap-2">
+                                            <i class="fa-solid fa-pen text-amber-400"></i> Chỉnh sửa bài đăng
+                                        </button>
+                                    ` : ''}
+
+                                    ${isSupreme ? `
+                                        <button onclick="adminDeletePost('${post.id}')" class="w-full text-left px-4 py-2 text-xs font-bold text-red-400 hover:bg-red-950/40 flex items-center gap-2">
+                                            <i class="fa-solid fa-trash"></i> Xóa bài đăng
+                                        </button>
+<button onclick="adminReportViolation('${post.id}', '${post.authorID}', '${post.authorNickname}')" class="w-full text-left px-4 py-2 text-xs font-bold text-amber-300 hover:bg-amber-950/40 flex items-center gap-2">
+                                            <i class="fa-solid fa-triangle-exclamation text-amber-400"></i> Báo cáo vi phạm (-20Đ)
+                                        </button>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Nội dung & Ảnh -->
+                        <p class="text-xs md:text-sm text-purple-100 whitespace-pre-line leading-relaxed">${post.content}</p>
+                        ${post.image ? `<img src="${post.image}" class="w-full max-h-96 object-cover rounded-2xl border border-purple-500/20">` : ''}
+
+                        <!-- Thanh Tương Tác: Thả Tim & Bình Luận -->
+                        <div class="flex items-center gap-4 border-t border-purple-500/20 pt-3 text-xs">
+                            <button onclick="toggleLike('${post.id}')" class="flex items-center gap-1.5 font-bold ${isLiked ? 'text-pink-500' : 'text-purple-300 hover:text-white'} transition">
+                                <i class="fa-solid fa-heart ${isLiked ? 'text-pink-500 animate-bounce' : ''}"></i>
+                                <span>${post.likes.length} Thích</span>
+                            </button>
+                            <span class="text-purple-300/60">•</span>
+                            <span class="font-bold text-purple-300"><i class="fa-solid fa-comment"></i> ${post.comments.length} Bình luận</span>
+                        </div>
+
+                        <!-- Danh sách Bình luận -->
+                        <div class="space-y-2 bg-slate-950/40 p-3 rounded-2xl border border-purple-500/10">
+                            <div class="space-y-2 max-h-40 overflow-y-auto">
+                                ${post.comments.map(c => `
+                                    <div class="text-xs bg-slate-900/80 p-2.5 rounded-xl border border-purple-500/10">
+                                        <span class="font-extrabold text-amber-300">${c.author}:</span>
+                                        <span class="text-purple-100 ml-1">${c.text}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+
+                            <!-- Khung nhập bình luận -->
+                            <div class="flex items-center gap-2 pt-1">
+                                <input type="text" id="commentInput_${post.id}" placeholder="Viết bình luận..." onkeydown="if(event.key==='Enter') addComment('${post.id}')" class="flex-1 bg-slate-900 border border-purple-500/30 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none">
+<button onclick="addComment('${post.id}')" class="px-3 py-1.5 bg-purple-600 text-white rounded-xl text-xs font-bold hover:bg-purple-500">
+                                    Gửi
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Thả tim
+        function toggleLike(postId) {
+            const posts = getPosts();
+            const post = posts.find(p => p.id === postId);
+            if (post) {
+                const idx = post.likes.indexOf(currentUser.accountID);
+                if (idx === -1) post.likes.push(currentUser.accountID);
+                else post.likes.splice(idx, 1);
+                savePosts(posts);
+                renderPosts();
+            }
+        }
+
+        // Thêm bình luận
+        function addComment(postId) {
+            const input = document.getElementById(`commentInput_${postId}`);
+            const text = input.value.trim();
+            if (!text) return;
+
+            const posts = getPosts();
+            const post = posts.find(p => p.id === postId);
+            if (post) {
+                post.comments.push({
+                    author: currentUser.nickname,
+                    text: text
+                });
+                savePosts(posts);
+                renderPosts();
+            }
+        }
+
+        // Mở Modal Chỉnh sửa bài đăng
+        function openEditPostModal(postId) {
+            const posts = getPosts();
+            const post = posts.find(p => p.id === postId);
+            if (post) {
+                document.getElementById('editPostId').value = post.id;
+                document.getElementById('editPostContent').value = post.content;
+                document.getElementById('editPostModal').classList.remove('hidden');
+            }
+        }
+
+        function closeEditPostModal() {
+            document.getElementById('editPostModal').classList.add('hidden');
+        }
+
+        function saveEditedPost() {
+            const id = document.getElementById('editPostId').value;
+            const newContent = document.getElementById('editPostContent').value.trim();
+
+            const posts = getPosts();
+            const post = posts.find(p => p.id === id);
+            if (post) {
+                post.content = newContent;
+                savePosts(posts);
+                closeEditPostModal();
+                renderPosts();
+                alert("🎉 Đã cập nhật lại nội dung bài đăng!");
+            }
+        }
+
+        // Tối Cao Xóa Bài Đăng
+        function adminDeletePost(postId) {
+            if (confirm("⚠️ [TỐI CAO] Bạn có chắc muốn xóa bài đăng này không?")) {
+                let posts = getPosts();
+                posts = posts.filter(p => p.id !== postId);
+                savePosts(posts);
+                renderPosts();
+            }
+        }
+// Tối Cao Báo Cáo Vi Phạm & Trừ 20 Bá Khí + Hiện Băng Rôn Cảnh Báo
+        function adminReportViolation(postId, authorID, authorNickname) {
+            if (confirm(`⚠️ CẢNH BÁO TỐI CAO:\nBạn có chắc muốn xử phạt người dùng [${authorNickname}]?\nHành động này sẽ TRỪ 20 ĐIỂM BÁ KHÍ, XÓA BÀI VÀ BẬT BĂNG RÔN CẢNH BÁO TOÀN SERVER!`)) {
+                
+                // 1. Xóa bài viết vi phạm
+                let posts = getPosts();
+                posts = posts.filter(p => p.id !== postId);
+                savePosts(posts);
+
+                // 2. Trừ 20 điểm Bá Khí trong danh sách User (localStorage)
+                let users = JSON.parse(localStorage.getItem('k8_users')) || [];
+                const userIdx = users.findIndex(u => u.accountID === authorID);
+                if (userIdx !== -1) {
+                    users[userIdx].points = Math.max(0, (users[userIdx].points || 0) - 20);
+                    localStorage.setItem('k8_users', JSON.stringify(users));
+                }
+
+                // 3. Hiển thị băng rôn cảnh cáo trừng phạt lớn
+                document.getElementById('violationUsername').innerText = authorNickname;
+                document.getElementById('violationBannerText').innerHTML = `Người dùng <span class="underline font-black text-amber-300">${authorNickname}</span> đã vi phạm nội quy diễn đàn, cảnh cáo trừng phạt`;
+                document.getElementById('violationBanner').classList.remove('hidden');
+
+                renderPosts();
+            }
+        }
+
+        function closeViolationBanner() {
+            document.getElementById('violationBanner').classList.add('hidden');
+        }
+
+        // Khởi chạy module khi load trang
+        window.onload = function() {
+            renderPosts();
+        };
+    </script>
+</body>
+</html>
